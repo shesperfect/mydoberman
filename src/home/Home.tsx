@@ -1,12 +1,17 @@
 import React from 'react';
-import './Spheres.scss';
+import './Home.scss';
+import { Link } from "react-router-dom";
 
-const Spheres: React.FC = () => {
+const Home: React.FC = () => {
   return (
     <div>
-     Spheres!!
+      <ul>
+        <li>
+          <Link to="/spheres">Spheres</Link>
+        </li>
+      </ul>
     </div>
   );
 };
 
-export default Spheres;
+export default Home;
