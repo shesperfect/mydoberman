@@ -9,6 +9,9 @@ const Home: React.FC = () => {
         <li>
           <Link to="/spheres">Spheres</Link>
         </li>
+        <li>
+          <Link to="/globe">Globe</Link>
+        </li>
       </ul>
     </div>
   );

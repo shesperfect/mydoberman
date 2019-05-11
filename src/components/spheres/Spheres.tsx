@@ -1,10 +1,9 @@
 import React, { Component } from 'react';
-import './Spheres.scss';
 import smoke from './textures/smoke.png';
 import {
-  Clock, DirectionalLight,
+  AmbientLight,
+  Clock, Color, Fog,
   Mesh, MeshLambertMaterial,
-  MeshNormalMaterial,
   PerspectiveCamera,
   PlaneBufferGeometry,
   Scene,
@@ -16,11 +15,11 @@ import * as Stats from "stats-js";
 import { GUI } from "dat.gui";
 import { initThreeHelpers } from "../../shared/helpers";
 
-const RADIUS = 10;
 const DISTANCE = 50;
 
-export default class Spheres extends Component {
+export class Spheres extends Component {
   stats = new Stats();
+  gui = new GUI();
   container: HTMLDivElement | null = null;
   renderer = new WebGLRenderer({ alpha: true });
   scene = new Scene();
@@ -35,20 +34,28 @@ export default class Spheres extends Component {
     this.container && this.container.appendChild(this.renderer.domElement);
     this.camera.position.set(0, 0, DISTANCE);
 
-    const directionalLight = new DirectionalLight( 0xffffff, 0.5 );
-    directionalLight.position.set(-1, 0, 100);
-    this.scene.add(directionalLight);
+    const ambientLight = new AmbientLight(0xffffff, 0.9);
+    this.scene.add(ambientLight);
 
-    const sphereGeometry = new SphereBufferGeometry(RADIUS, RADIUS * 2, RADIUS * 5);
-    const sphereMaterial = new MeshNormalMaterial({ wireframe: true });
-    sphereMaterial.opacity = 0.7;
-    const sphere = new Mesh(sphereGeometry, sphereMaterial);
-    this.scene.add(sphere);
+    const fogColor = 0xf9b1bc;
+    this.scene.background = new Color(fogColor);
+    this.scene.fog = new Fog(fogColor, 1, 1000);
+
+    // const directionalLight = new DirectionalLight( 0xffffff, 0.5 );
+    // directionalLight.position.set(-1, 0, 100);
+    // this.scene.add(directionalLight);
+
+    window.addEventListener( 'resize', this.onWindowResize.bind(this), false );
 
     this.initControls();
     initThreeHelpers(this.scene, 50);
     this.initSmoke();
+    this.initSpheres();
     this.animate();
+  }
+
+  componentWillUnmount(): void {
+    this.gui.destroy();
   }
 
   animate () {
@@ -63,7 +70,7 @@ export default class Spheres extends Component {
     const material = new MeshLambertMaterial({ color: 0xf9b1bc, emissive: 0xff7373, opacity: 0.6, transparent: true });
     new TextureLoader().load(smoke, texture => {
       material.map = texture;
-      for (let i = 0; i < 15; i++) {
+      for (let i = 0; i < 35; i++) {
         const particle = new Mesh(geometry, material);
         particle.position.set(Math.random() * 100 - 50, Math.random() * 80 - 40, -Math.random() * 80);
         particle.rotation.z = Math.random() * 360;
@@ -73,21 +80,39 @@ export default class Spheres extends Component {
     });
   }
 
+  initSpheres() {
+    const sphereGeometry1 = new SphereBufferGeometry(15, 60, 60);
+    const sphereMaterial1 = new MeshLambertMaterial({ color: 0x26619c, opacity: 0.6, wireframe: true });
+    const sphere1 = new Mesh(sphereGeometry1, sphereMaterial1);
+    this.scene.add(sphere1);
+
+    const sphereGeometry2 = new SphereBufferGeometry(12, 40, 40);
+    const sphereMaterial2 = new MeshLambertMaterial({ color: 0xcc2004, wireframe: true });
+    const sphere2 = new Mesh(sphereGeometry2, sphereMaterial2);
+    sphere2.position.set(35 , -10, -20);
+    this.scene.add(sphere2);
+  }
+
   rotateSmoke(delta: number) {
     for (let i = 0; i < this.smokeParticles.length; i++) {
       this.smokeParticles[i].rotation.z += (delta * 0.2);
     }
   }
 
+  onWindowResize() {
+    this.camera.aspect = window.innerWidth / window.innerHeight;
+    this.camera.updateProjectionMatrix();
+    this.renderer.setSize(window.innerWidth, window.innerHeight);
+  }
+
   initControls() {
     new OrbitControls(this.camera, this.renderer.domElement);
-    const gui = new GUI();
     const moveSmokeButton = {
       moveSmoke: () => {
        this.smokeMoving = !this.smokeMoving;
       }
     };
-    gui.add(moveSmokeButton, 'moveSmoke');
+    this.gui.add(moveSmokeButton, 'moveSmoke');
     this.container && this.container.appendChild(this.stats.domElement);
   }
 
@@ -96,4 +121,4 @@ export default class Spheres extends Component {
       <div ref={el => this.container = el}/>
     );
   }
-};
+}
