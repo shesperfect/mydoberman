@@ -1,0 +1,97 @@
+@import url('https://fonts.googleapis.com/css?family=Roboto&display=swap');
+
+.audio-player {
+  display: flex;
+  height: 60px;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  transition: margin 0.3s;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  animation: .3s fadeIn ease-out;
+}
+
+.source-audio {
+  display: none;
+}
+
+.logo {
+  width: 60px;
+  background: #788878;
+
+  img {
+    width: 100%;
+    height: 100%;
+  }
+}
+
+.info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+
+  .name {
+    font-family: 'Roboto', sans-serif;
+    color: #fff;
+    font-size: 14px;
+    padding: 2px 10px;
+  }
+}
+
+.audio-controls {
+  height: 35px;
+  display: flex;
+  align-items: center;
+  padding: 0 10px;
+}
+
+.button {
+  height: 35px;
+  border: none;
+  background-size: 50% 50%;
+  background-repeat: no-repeat;
+  background-position: center;
+  outline: none;
+  margin-right: 10px;
+  width: 10px;
+  fill: none;
+  stroke: #ffffff;
+  stroke-width: 0.5;
+  stroke-miterlimit: 10;
+  cursor: pointer;
+  vertical-align: top;
+}
+
+.scale {
+  height: 2px;
+  background: #DBE3E3;
+}
+
+.timeline {
+  flex: 1;
+  margin-right: 10px;
+}
+
+.volume {
+  width: 80px;
+}
+
+.play-head {
+  width: 6px;
+  height: 6px;
+  margin-top: -2px;
+  border-radius: 3px;
+  background: #fff;
+  cursor: pointer;
+}
+
+@keyframes fadeIn {
+  from {
+    margin-top: -60px;
+  }
+  to {
+    margin-top: 0;
+  }
+}

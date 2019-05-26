@@ -1,16 +1,30 @@
 import React, { Component } from 'react';
 import {
-  AmbientLight, BackSide, Color, DirectionalLight, Mesh, MeshBasicMaterial, MeshPhongMaterial,
+  AmbientLight,
+  BackSide, BoxGeometry,
+  Color,
+  DirectionalLight,
+  Geometry,
+  Mesh,
+  MeshBasicMaterial,
+  MeshLambertMaterial,
+  MeshPhongMaterial,
   PerspectiveCamera,
-  Scene, SphereGeometry, TextureLoader,
+  Scene,
+  SphereGeometry,
+  TextureLoader,
+  Vector2, Vector3,
   WebGLRenderer
 } from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import * as Stats from "stats-js";
+import { latLongToVector3 } from "../../shared/helpers";
 import earthMap from "./textures/earth-map.jpg";
-import earthBumpMap from "./textures/earth-bump-map.jpg";
+import earthNormalMap from "./textures/earth-normal-map.jpg";
+import earthSpecularMap from "./textures/earth-specular-map.jpg";
 import earthCloudsMap from "./textures/earth-clouds-map.png";
 import galaxyMap from "./textures/galaxy-map.png";
+import cities from "./data";
 
 export class Globe extends Component {
   stats = new Stats();
@@ -27,7 +41,7 @@ export class Globe extends Component {
     this.renderer.setSize(window.innerWidth, window.innerHeight);
     this.renderer.setPixelRatio(devicePixelRatio);
     this.container && this.container.appendChild(this.renderer.domElement);
-    this.camera.position.set(0, 0, 10);
+    this.camera.position.set(0, 0, 30);
     this.scene.background = new Color(0x000c1c);
 
     const ambientLight = new AmbientLight(0xffffff, 0.7);
@@ -41,29 +55,33 @@ export class Globe extends Component {
 
     this.initControls();
     this.initGlobe();
+    this.initCubes();
     this.animate();
   }
 
   initGlobe() {
     const loader = new TextureLoader();
     const texture = loader.load(earthMap);
-    const bumpTexture = loader.load(earthBumpMap);
+    const normalTexture = loader.load(earthNormalMap);
+    const specularTexture = loader.load(earthSpecularMap);
     const cloudsTexture = loader.load(earthCloudsMap);
     const galaxyTexture = loader.load(galaxyMap);
 
     this.globe = new Mesh(
-      new SphereGeometry(5, 60, 60),
+      new SphereGeometry(15, 60, 60),
       new MeshPhongMaterial({
         map: texture,
-        bumpMap: bumpTexture,
-        bumpScale: 0.9,
+        normalMap: normalTexture,
+        normalScale: new Vector2(0.8, 0.7),
+        specularMap: specularTexture,
+        specular: new Color(0x262626),
         shininess: 10,
       }),
     );
     this.scene.add(this.globe);
 
     this.clouds = new Mesh(
-      new SphereGeometry(5.01, 60, 60),
+      new SphereGeometry(15.02, 60, 60),
       new MeshPhongMaterial({
         map: cloudsTexture,
         transparent: true
@@ -80,6 +98,26 @@ export class Globe extends Component {
     );
     this.scene.add(this.galaxy);
   };
+
+  async initCubes() {
+    const geometry = new Geometry();
+    const material = new MeshLambertMaterial({ color: 0x3333ff, opacity: 0.8, transparent: true, emissive: 0x262626 });
+
+    cities.forEach((point: number[]) => {
+      const lat = point[0] - 90.5 * -1;
+      const lon = point[1] - 179.5;
+      const population = point[2];
+      const position = latLongToVector3(lat, lon, 15);
+      const cube = new Mesh(new BoxGeometry(0.2, 0.2, population / 40000, 1, 1, 1), material);
+      cube.position.copy(position);
+      cube.lookAt(new Vector3(0, 0, 0));
+      geometry.mergeMesh(cube);
+    });
+
+    const cubes = new Mesh(geometry, material);
+
+    this.scene.add(cubes);
+  }
 
   animate () {
     requestAnimationFrame(this.animate.bind(this));
@@ -101,8 +139,8 @@ export class Globe extends Component {
     this.orbitControls = new OrbitControls(this.camera, this.renderer.domElement);
     this.orbitControls.rotateSpeed = 0.1;
     this.orbitControls.zoomSpeed = 0.3;
-    this.orbitControls.maxDistance = 40;
-    this.orbitControls.minDistance = 7;
+    this.orbitControls.maxDistance = 100;
+    this.orbitControls.minDistance = 30;
     this.orbitControls.enableDamping = true;
     this.orbitControls.dampingFactor = 0.1;
     this.container && this.container.appendChild(this.stats.domElement);

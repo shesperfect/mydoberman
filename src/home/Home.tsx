@@ -12,6 +12,9 @@ const Home: React.FC = () => {
         <li>
           <Link to="/globe">Globe</Link>
         </li>
+        <li>
+          <Link to="/sound-wave">Sound wave</Link>
+        </li>
       </ul>
     </div>
   );
